@@ -5,8 +5,10 @@ import com.example.taskserver.domain.Task;
 import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.service.TaskService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,7 +21,10 @@ public class TaskController {
         this.service = service;
     }
     @PostMapping
-    public ResponseEntity<Task> saveTask(@RequestBody Task task){
+    public ResponseEntity<Task> saveTask(@Valid @RequestBody Task task, Errors errors){
+        if(errors.hasErrors()){
+            throw new ApiRequestExceptions("Task is not valid");
+        }
         Task task2=service.findByName(task);
         if(task2!=null){
             throw new ApiRequestExceptions("The task is in DB");

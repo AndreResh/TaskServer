@@ -9,6 +9,9 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 
 @Data
 @Table("task")
@@ -22,8 +25,12 @@ public class Task {
             type = PrimaryKeyType.PARTITIONED)
     private Long id;
     @Column(value = "name")
+    @NotBlank
+    @NotNull
     private String name;
     @Column(value = "description")
+    @NotBlank
+    @NotNull
     private String description;
     @Column(value = "completed")
     private boolean isCompleted;
