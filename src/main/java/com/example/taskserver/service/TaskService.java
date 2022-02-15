@@ -42,8 +42,8 @@ public class TaskService {
         return repository.findAllTasks();
     }
 
-    public Task findByName(Task task) {
-        return repository.findByName(task.getName());
+    public Task findByName(String name) {
+        return repository.findByName(name);
     }
 
     public Task update(Long id, Task t) {
@@ -61,7 +61,7 @@ public class TaskService {
         if (t.getUserId() != null) {
             task1.setUserId(t.getUserId());
         }
-        repository.save(task1);
+        repository.update(id,task1.getName(),task1.getDescription(), task1.getUserId(), task1.getWeaponId());
         return task1;
     }
 }

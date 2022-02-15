@@ -19,4 +19,9 @@ public interface TaskRepository extends CassandraRepository<Task,Long> {
     public List<Task> findAllTasks();
     @Query("select * from task where id=:id allow filtering")
     public Task getTaskById(@Param("id")Long id);
+    @Query("update task " +
+            "set name=:name, description=:description,  " +
+            " user_id=:userId, weapon_id=:weaponId where id=:id")
+    public Task update(@Param("id")Long id, @Param("name")String name, @Param("description")String description,
+                       @Param("userId")Long userId,  @Param("weaponId")Long weaponId);
 }

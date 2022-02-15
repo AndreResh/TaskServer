@@ -25,20 +25,24 @@ public class TaskController {
         if(errors.hasErrors()){
             throw new ApiRequestExceptions("Task is not valid");
         }
-        Task task2=service.findByName(task);
+        Task task2=service.findByName(task.getName());
         if(task2!=null){
             throw new ApiRequestExceptions("The task is in DB");
         }
         return ResponseEntity.ok(service.save(task));
     }
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(){
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<Task> getTask(@RequestBody Task task){
+        return ResponseEntity.ok(service.findByName(task.getName()));
     }
     @GetMapping("/{id}")
     public ResponseEntity<Task> findTaskById(@PathVariable("id") Long id){
         Task task=service.findById(id);
-        return Objects.isNull(task)?ResponseEntity.notFound().build():ResponseEntity.ok(task);
+        if(Objects.isNull(task)){
+            throw new ApiRequestExceptions("Not found");
+        } else {
+            return ResponseEntity.ok(task);
+        }
     }
     @DeleteMapping("/{id}")
     public void  deleteTask(@PathVariable("id") Long id){
