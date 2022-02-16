@@ -16,18 +16,18 @@ public class TaskService {
         this.repository = repository;
     }
 
-    public Task save(Task question) {
+    public Task save(Task task) {
         List<Task> list = findAll();
-        Long integer;
+        Long number;
         try {
-            integer = list.stream().max((o1, o2) -> {
+            number = list.stream().max((o1, o2) -> {
                 return (int) (o1.getId() - o2.getId());
             }).get().getId();
         } catch (NoSuchElementException e) {
-            integer = 0L;
+            number = 0L;
         }
-        question.setId(++integer);
-        return repository.save(question);
+        task.setId(++number);
+        return repository.save(task);
     }
 
     public Task findById(Long id) {
