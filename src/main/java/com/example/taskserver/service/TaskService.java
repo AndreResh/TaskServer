@@ -55,13 +55,13 @@ public class TaskService {
         if (t.getDescription() != null) {
             task1.setDescription(t.getDescription());
         }
-        if (t.getWeaponId() != null) {
-            task1.setBandId(t.getWeaponId());
+        if (t.getStrength()!= null) {
+            task1.setStrength(t.getStrength());
         }
-        if (t.getUserId() != null) {
-            task1.setUserId(t.getUserId());
+        if (t.getNumberOfPeople() != null) {
+            task1.setNumberOfPeople(t.getNumberOfPeople());
         }
-        repository.update(id,task1.getName(),task1.getDescription(), task1.getUserId(), task1.getWeaponId());
+        repository.update(id,task1.getName(),task1.getDescription(), task1.getStrength(), task1.getNumberOfPeople());
         return task1;
     }
 }

@@ -21,7 +21,7 @@ public interface TaskRepository extends CassandraRepository<Task,Long> {
     public Task getTaskById(@Param("id")Long id);
     @Query("update task " +
             "set name=:name, description=:description,  " +
-            " user_id=:userId, weapon_id=:weaponId where id=:id")
+            "strength=:strength, number_of_people=:numberOfPeople where id=:id")
     public Task update(@Param("id")Long id, @Param("name")String name, @Param("description")String description,
-                       @Param("userId")Long userId,  @Param("weaponId")Long weaponId);
+                       @Param("strength")Long strength,  @Param("numberOfPeople")Long numberOfPeople);
 }

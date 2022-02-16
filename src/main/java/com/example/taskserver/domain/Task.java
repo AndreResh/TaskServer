@@ -9,14 +9,14 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 
 @Data
 @Table("task")
-@AllArgsConstructor
-@NoArgsConstructor
 public class Task {
     @Id
     @PrimaryKeyColumn(
@@ -36,8 +36,10 @@ public class Task {
     private boolean isCompleted;
     @Column(value = "band_id")
     private Long bandId;
-    @Column(value = "user_id")
-    private Long userId;
-    @Column(value = "weapon_id")
-    private Long weaponId;
+    @Column(value = "strength")
+    @Min(value = 1)
+    @Max(value = 10)
+    private Long strength;
+    @Column(value = "number_of_people")
+    private Long numberOfPeople;
 }

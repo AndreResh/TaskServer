@@ -9,7 +9,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -32,8 +31,8 @@ public class TaskController {
         return ResponseEntity.ok(service.save(task));
     }
     @GetMapping
-    public ResponseEntity<Task> getTask(@RequestBody Task task){
-        return ResponseEntity.ok(service.findByName(task.getName()));
+    public ResponseEntity<Task> getTask(@RequestParam("taskName")String name){
+        return ResponseEntity.ok(service.findByName(name));
     }
     @GetMapping("/{id}")
     public ResponseEntity<Task> findTaskById(@PathVariable("id") Long id){
