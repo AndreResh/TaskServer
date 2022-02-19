@@ -19,3 +19,4 @@ astra.db:
   region: europe-west1
   keyspace: schema_db
   application.token: AstraCS:eaMLrrEtradaZNjqaCZLqvnc:9f8432bc6ea72fe2d61c542a8f2278523aa1cf7de2504f102957be34a61afe15
+

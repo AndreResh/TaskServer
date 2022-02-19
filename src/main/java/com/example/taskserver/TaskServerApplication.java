@@ -16,9 +16,9 @@ public class TaskServerApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(TaskServerApplication.class, args);
-        logger.debug("DEBUG LEVEL");
-        logger.error("ERROR LEVEL");
-        logger.error("INFO LEVEL");
+//        logger.debug("DEBUG LEVEL");
+//        logger.error("ERROR LEVEL");
+//        logger.error("INFO LEVEL");
     }
 
 }
