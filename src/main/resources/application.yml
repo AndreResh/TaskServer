@@ -12,7 +12,8 @@ spring:
       schema-action: create_if_not_exists
 
 datastax.astra:
-  secure-connect-bundle: /home/andrew/IdeaProjects/Task Server/secure-connect-tasks-db (1).zip
+  secure-connect-bundle: secure-connect-tasks-db (1).zip
+
 
 astra.db:
   id: 70815b3c-23df-49d8-83b6-1fce4632359e-1
