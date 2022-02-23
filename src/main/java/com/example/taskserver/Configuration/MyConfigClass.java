@@ -3,6 +3,8 @@ package com.example.taskserver.Configuration;
 import org.springframework.boot.autoconfigure.cassandra.CqlSessionBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class MyConfigClass {
@@ -12,4 +14,16 @@ public class MyConfigClass {
             cqlSessionBuilder.withCloudSecureConnectBundle(properties.getSecureConnectBundle().toPath());
         };
     }
+    @Bean
+    public HttpComponentsClientHttpRequestFactory factory(){
+        return new HttpComponentsClientHttpRequestFactory();
+    }
+//    @Bean
+//    public RestTemplate restTemplate(HttpComponentsClientHttpRequestFactory factory) {
+//        return new RestTemplate(factory);
+//    }
+//    @Bean
+//    public TaskClientProperties properties(){
+//        return new TaskClientProperties();
+//    }
 }
