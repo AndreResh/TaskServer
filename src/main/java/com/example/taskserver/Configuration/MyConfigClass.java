@@ -18,12 +18,12 @@ public class MyConfigClass {
     public HttpComponentsClientHttpRequestFactory factory(){
         return new HttpComponentsClientHttpRequestFactory();
     }
-//    @Bean
-//    public RestTemplate restTemplate(HttpComponentsClientHttpRequestFactory factory) {
-//        return new RestTemplate(factory);
-//    }
-//    @Bean
-//    public TaskClientProperties properties(){
-//        return new TaskClientProperties();
-//    }
+////    @Bean
+// //   public RestTemplate restTemplate(HttpComponentsClientHttpRequestFactory factory) {
+// //       return new RestTemplate(factory);
+//  //  }
+//  //  @Bean
+//  //  public TaskClientProperties properties(){
+// //       return new TaskClientProperties();
+////    }
 }

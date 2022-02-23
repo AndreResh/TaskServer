@@ -2,8 +2,10 @@ package com.example.taskserver;
 
 import com.example.taskserver.Configuration.DataStaxAstraProperties;
 import com.example.taskserver.Configuration.TaskClientProperties;
+import com.example.taskserver.domain.Band;
 import com.example.taskserver.domain.User;
 import com.example.taskserver.domain.Weapon;
+import com.example.taskserver.repository.TaskRepository;
 import org.codehaus.jackson.JsonNode;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +20,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -30,5 +33,21 @@ public class TaskServerApplication {
 
         SpringApplication.run(TaskServerApplication.class, args);
     }
+//    @Bean
+//    public CommandLineRunner runner(RestTemplate restTemplate, TaskClientProperties properties, TaskRepository repository){
+//        return args -> {
+//            Band band=restTemplate.exchange(properties.getUrlBands()+"Corleone",
+//                    HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {
+//                    }).getBody();
+//            System.out.println(band);
+//            if(band!=null) {
+//                Long bandId = band.getId();
+//                repository.addTaskToBand(2L,bandId);
+//                System.out.println(repository.findById(2L));
+//            } else {
+//                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//            }
+//        };
+//    }
 
 }
