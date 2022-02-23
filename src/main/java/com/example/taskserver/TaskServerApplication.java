@@ -5,12 +5,20 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SpringBootApplication(scanBasePackages = "com.example.taskserver")
 @EnableConfigurationProperties(DataStaxAstraProperties.class)
 public class TaskServerApplication {
+    private final static Logger logger=LoggerFactory.getLogger(TaskServerApplication.class);
 
     public static void main(String[] args) {
+
         SpringApplication.run(TaskServerApplication.class, args);
+//        logger.debug("DEBUG LEVEL");
+//        logger.error("ERROR LEVEL");
+//        logger.error("INFO LEVEL");
     }
 
 }
