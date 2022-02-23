@@ -69,11 +69,12 @@ public class TaskController {
         return ResponseEntity.ok(service.update(id, task));
     }
 
-//    @PatchMapping("/{id}/addBand")
-//    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody String bandName) {
-//        log.info("Add task with name {}", bandName);
-//        return ResponseEntity.ok(service.addTaskToBand(id, bandName));
-//    }
+    @PatchMapping("/{id}/addBand")
+    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody String bandName) {
+        log.info("Add task with name {}", bandName);
+        service.addTaskToBand(id,bandName);
+        return ResponseEntity.ok(service.findById(id));
+    }
     @PatchMapping("/{id}/completed")
     public ResponseEntity<Task> makeCompleted(@PathVariable("id") Long id) {
         log.info("Make task with id: {} completed", id);

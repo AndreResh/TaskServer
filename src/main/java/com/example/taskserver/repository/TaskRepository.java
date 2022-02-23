@@ -27,6 +27,6 @@ public interface TaskRepository extends CassandraRepository<Task,Long> {
     @Query("update task set completed = true where id=:id")
     public void makeTaskCompleted(@Param("id") Long id);
     @Query("update task set band_id=:bandId where id=:id")
-    public Task addTaskToBand(@Param("id") Long id,@Param("bandId") Long bandId);
+    public void addTaskToBand(@Param("id") Long id,@Param("bandId") Long bandId);
 
 }

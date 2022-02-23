@@ -7,13 +7,16 @@ import com.example.taskserver.domain.User;
 import com.example.taskserver.domain.Weapon;
 import com.example.taskserver.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.HashMap;
@@ -90,11 +93,19 @@ public class TaskService {
         return task1;
     }
 
-//    public Task addTaskToBand(Long id, String bandName) {
-//        Band band=restTemplate.exchange(bandUri + bandName, HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {}).getBody();
-//        Long bandId=band.getId();
-//        return repository.addTaskToBand(id,bandId);
-//    }
+    public void addTaskToBand(Long id, String bandName) {
+       Band band=restTemplate.exchange(properties.getUrlBands()+bandName,
+                        HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {
+                        }).getBody();
+
+        if(band!=null) {
+            Long bandId = band.getId();
+            repository.addTaskToBand(id,bandId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+    }
 
     public void makeTaskCompleted(Long id) {
         Map<String,List<Weapon>> mapOfWeapons =

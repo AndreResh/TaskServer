@@ -31,33 +31,4 @@ public class TaskServerApplication {
         SpringApplication.run(TaskServerApplication.class, args);
     }
 
-//    @Bean
-//    public CommandLineRunner run(RestTemplate restTemplate, TaskClientProperties properties) throws Exception {
-//        return args -> {
-//            Map<String,List<Weapon>> mapOfWeapons =
-//                    restTemplate.exchange(properties.getUrlWeapons(),
-//                            HttpMethod.GET, null, new ParameterizedTypeReference<Map<String,List<Weapon>>>() {
-//                            }).getBody();
-//            System.out.println(mapOfWeapons);
-//            List<User> mapOfUsers =
-//                    restTemplate.exchange(properties.getUrlUsers(),
-//                            HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {
-//                            }).getBody();
-//            System.out.println(mapOfUsers);
-//            Weapon weapon=mapOfWeapons.get("weapons").stream().filter(o->o.getTask_id().equals(2L)).findFirst().get();
-//            User user=mapOfUsers.stream().filter(o->o.getTaskId().equals(2L)).findFirst().get();
-//            Long weaponId=weapon.getId();
-//            Long userId=user.getUserId();
-//            Map<String,Object> mapForWeapons=new HashMap<>();
-//            mapForWeapons.put("task_id",0L);
-//            Map<String,Object> mapForUsers=new HashMap<>();
-//            mapForUsers.put("taskId",0L);
-//            System.out.println(weapon);
-//            System.out.println(user);
-//            restTemplate.patchForObject(properties.getUrlWeapons()+weaponId,new HttpEntity<>(mapForWeapons),Object.class);
-//            restTemplate.patchForObject(properties.getUrlUsers()+userId,new HttpEntity<>(mapForUsers),Object.class);
-//            return  repository.makeTaskCompleted(id);
-//        };
-//    }
-
 }
