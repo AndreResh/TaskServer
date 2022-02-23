@@ -33,21 +33,5 @@ public class TaskServerApplication {
 
         SpringApplication.run(TaskServerApplication.class, args);
     }
-//    @Bean
-//    public CommandLineRunner runner(RestTemplate restTemplate, TaskClientProperties properties, TaskRepository repository){
-//        return args -> {
-//            Band band=restTemplate.exchange(properties.getUrlBands()+"Corleone",
-//                    HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {
-//                    }).getBody();
-//            System.out.println(band);
-//            if(band!=null) {
-//                Long bandId = band.getId();
-//                repository.addTaskToBand(2L,bandId);
-//                System.out.println(repository.findById(2L));
-//            } else {
-//                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//            }
-//        };
-//    }
 
 }

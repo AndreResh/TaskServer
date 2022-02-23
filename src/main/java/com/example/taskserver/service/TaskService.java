@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Service
 public class TaskService {
-//        private final static Logger log= LoggerFactory.getLogger(TaskController.class);
+    //        private final static Logger log= LoggerFactory.getLogger(TaskController.class);
     private final TaskRepository repository;
     private final RestTemplate restTemplate;
     private final TaskClientProperties properties;
@@ -35,8 +35,8 @@ public class TaskService {
 
     public TaskService(TaskRepository repository, TaskClientProperties properties, HttpComponentsClientHttpRequestFactory factory) {
         this.repository = repository;
-        this.restTemplate=new RestTemplate(factory);
-        this.properties=properties;
+        this.restTemplate = new RestTemplate(factory);
+        this.properties = properties;
     }
 
     public Task save(Task task) {
@@ -88,19 +88,22 @@ public class TaskService {
         if (t.getNumberOfPeople() != null) {
             task1.setNumberOfPeople(t.getNumberOfPeople());
         }
+        if(t.getBandId()!=null){
+            task1.setBandId(t.getBandId());
+        }
         log.info("Task which updating: {}", task1);
         repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength(), task1.getNumberOfPeople());
         return task1;
     }
 
-    public void addTaskToBand(Long id, String bandName) {
-       Band band=restTemplate.exchange(properties.getUrlBands()+bandName,
-                        HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {
-                        }).getBody();
-
-        if(band!=null) {
+    public void addTaskToBand(Long id, Band band) {
+        log.info("add to Task with id: {}. Band name: {}", id, band.getBandName());
+        band = restTemplate.exchange(properties.getUrlBands() + band.getBandName(),
+                HttpMethod.GET, null, new ParameterizedTypeReference<Band>() {
+                }).getBody();
+        if (band != null) {
             Long bandId = band.getId();
-            repository.addTaskToBand(id,bandId);
+            repository.addTaskToBand(id, bandId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -108,24 +111,24 @@ public class TaskService {
     }
 
     public void makeTaskCompleted(Long id) {
-        Map<String,List<Weapon>> mapOfWeapons =
+        Map<String, List<Weapon>> mapOfWeapons =
                 restTemplate.exchange(properties.getUrlWeapons(),
-                        HttpMethod.GET, null, new ParameterizedTypeReference<Map<String,List<Weapon>>>() {
+                        HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
                         }).getBody();
         List<User> mapOfUsers =
                 restTemplate.exchange(properties.getUrlUsers(),
                         HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {
                         }).getBody();
-        Weapon weapon=mapOfWeapons.get("weapons").stream().filter(o->o.getTask_id().equals(id)).findFirst().get();
-        User user=mapOfUsers.stream().filter(o->o.getTaskId().equals(id)).findFirst().get();
-        Long weaponId=weapon.getId();
-        Long userId=user.getUserId();
-        Map<String,Object> mapForWeapons=new HashMap<>();
-        mapForWeapons.put("task_id",0L);
-        Map<String,Object> mapForUsers=new HashMap<>();
-        mapForUsers.put("taskId",0L);
-        restTemplate.patchForObject(properties.getUrlWeapons()+weaponId,new HttpEntity<>(mapForWeapons),Object.class);
-        restTemplate.patchForObject(properties.getUrlUsers()+userId,new HttpEntity<>(mapForUsers),Object.class);
+        Weapon weapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id().equals(id)).findFirst().get();
+        User user = mapOfUsers.stream().filter(o -> o.getTaskId().equals(id)).findFirst().get();
+        Long weaponId = weapon.getId();
+        Long userId = user.getUserId();
+        Map<String, Object> mapForWeapons = new HashMap<>();
+        mapForWeapons.put("task_id", 0L);
+        Map<String, Object> mapForUsers = new HashMap<>();
+        mapForUsers.put("taskId", 0L);
+        restTemplate.patchForObject(properties.getUrlWeapons() + weaponId, new HttpEntity<>(mapForWeapons), Object.class);
+        restTemplate.patchForObject(properties.getUrlUsers() + userId, new HttpEntity<>(mapForUsers), Object.class);
         repository.makeTaskCompleted(id);
     }
 }

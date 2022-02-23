@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Band {
     private Long id;
-    private String name;
+    private String bandName;
 
     public Band() {
     }

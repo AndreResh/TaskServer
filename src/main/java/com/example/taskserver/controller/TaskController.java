@@ -1,6 +1,7 @@
 package com.example.taskserver.controller;
 
 
+import com.example.taskserver.domain.Band;
 import com.example.taskserver.domain.Task;
 import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.service.TaskService;
@@ -13,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Objects;
-
+@Slf4j
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
-    private final static Logger log = LoggerFactory.getLogger(TaskController.class);
+//    private final static Logger log = LoggerFactory.getLogger(TaskController.class);
     private final TaskService service;
 
     public TaskController(TaskService service) {
@@ -70,7 +71,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/addBand")
-    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody String bandName) {
+    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody Band bandName) {
         log.info("Add task with name {}", bandName);
         service.addTaskToBand(id,bandName);
         return ResponseEntity.ok(service.findById(id));
