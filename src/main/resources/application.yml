@@ -20,8 +20,8 @@ astra.db:
   keyspace: schema_db
   application.token: AstraCS:eaMLrrEtradaZNjqaCZLqvnc:9f8432bc6ea72fe2d61c542a8f2278523aa1cf7de2504f102957be34a61afe15
 
-logging:
-  config: /home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml
+#logging:
+#  config: /home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml
 
 tasks:
   url-weapons: https://weapon-service-v1.herokuapp.com/api/v1/weapons/
