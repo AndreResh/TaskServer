@@ -31,5 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-/home/andrew/IdeaProjects/Task Server/tests.log
-/home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml
