@@ -19,10 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -121,6 +118,9 @@ public class TaskService {
                         }).getBody();
         Weapon weapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id().equals(id)).findFirst().get();
         User user = mapOfUsers.stream().filter(o -> o.getTaskId().equals(id)).findFirst().get();
+        if(user==null || weapon==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         Long weaponId = weapon.getId();
         Long userId = user.getUserId();
         Map<String, Object> mapForWeapons = new HashMap<>();
