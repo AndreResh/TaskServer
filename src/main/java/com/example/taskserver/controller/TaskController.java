@@ -18,7 +18,6 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
-//    private final static Logger log = LoggerFactory.getLogger(TaskController.class);
     private final TaskService service;
 
     public TaskController(TaskService service) {
@@ -57,6 +56,7 @@ public class TaskController {
             return ResponseEntity.ok(task);
         }
     }
+
 
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable("id") Long id) {
