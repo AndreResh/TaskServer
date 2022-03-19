@@ -132,4 +132,7 @@ public class TaskService {
         });
         repository.makeTaskCompleted(id);
     }
+    public List<Task> findAllTasks(){
+        return repository.findAll();
+    }
 }

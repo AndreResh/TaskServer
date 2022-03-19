@@ -38,9 +38,16 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<Task> getTask(@RequestParam("taskName") String name) {
-        log.info("Searching task with name: {}", name);
-        return ResponseEntity.ok(service.findByName(name));
+    public ResponseEntity<?> getTask(@RequestParam(value = "taskName", required = false) String name) {
+
+        if(name==null){
+            log.info("Getting all tasks");
+            return ResponseEntity.ok(service.findAllTasks());
+        } else {
+            log.info("Searching task with name: {}", name);
+            return ResponseEntity.ok(service.findByName(name));
+        }
+
     }
 
     @GetMapping("/{id}")
