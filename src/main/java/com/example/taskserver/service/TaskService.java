@@ -1,18 +1,17 @@
 package com.example.taskserver.service;
 
 import com.example.taskserver.Configuration.TaskClientProperties;
-import com.example.taskserver.domain.Band;
+import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
-import com.example.taskserver.domain.User;
-import com.example.taskserver.domain.Weapon;
+import com.example.taskserver.dto.User;
+import com.example.taskserver.dto.Weapon;
+import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,11 +19,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class TaskService {
-    //        private final static Logger log= LoggerFactory.getLogger(TaskController.class);
     private final TaskRepository repository;
     private final RestTemplate restTemplate;
     private final TaskClientProperties properties;
@@ -116,19 +115,21 @@ public class TaskService {
                 restTemplate.exchange(properties.getUrlUsers(),
                         HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {
                         }).getBody();
-        Weapon weapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id().equals(id)).findFirst().get();
-        User user = mapOfUsers.stream().filter(o -> o.getTaskId().equals(id)).findFirst().get();
-        if(user==null || weapon==null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
+        List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+        if(listUser.isEmpty() || listWeapon.isEmpty()){
+            throw new ApiRequestExceptions("No users or weapons with such task id");
         }
-        Long weaponId = weapon.getId();
-        Long userId = user.getUserId();
-        Map<String, Object> mapForWeapons = new HashMap<>();
-        mapForWeapons.put("task_id", 0L);
-        Map<String, Object> mapForUsers = new HashMap<>();
-        mapForUsers.put("taskId", 0L);
-        restTemplate.patchForObject(properties.getUrlWeapons() + weaponId, new HttpEntity<>(mapForWeapons), Object.class);
-        restTemplate.patchForObject(properties.getUrlUsers() + userId, new HttpEntity<>(mapForUsers), Object.class);
+        log.info("List of Users: {}",listUser);
+        log.info("List of Weapons: {}",listWeapon);
+        Map<String, Long> mapForWeapons=Map.of("task_id",0L);
+        Map<String, Object> mapForUsers = Map.of("taskId", 0L);
+        listUser.forEach(user -> {
+            restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(), new HttpEntity<>(mapForUsers), Object.class);
+        });
+        listWeapon.forEach(weapon -> {
+            restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(), new HttpEntity<>(mapForWeapons), Object.class);
+        });
         repository.makeTaskCompleted(id);
     }
 }
