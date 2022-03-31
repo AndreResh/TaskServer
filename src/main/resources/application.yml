@@ -2,23 +2,23 @@ spring:
   data:
     cassandra:
       keyspace-name: main
-      username: jsQamnbYNriFDpQfehPqQlOk
-      password: 3U_5hK-iYXrn3IUxR.h8DLWdSYgTivZAnZxLde8voz0Ba77Ug_LUP9XJy.QjrWIbGptY87_ZSezb,s.vB7Z93zIKM2PDdMA5kZHc1_gxOG58IKZlTuqqucJNi7OD2LBb
+      username: ltrTGdcpJCBFTiIXigkEJDOE
+      password: 3HrDP,IIT7H4TYIHZ__o2ITGhe3eT9Sg7TsqBJatQ8.czgbFAomZBIvw5LlZtKfp3Gg+Xa3EsLZN521XhFw0e_RQK7HhOeRsu7Wdh3saZfbtM8Few2Hu5XB0QoyRlcM4
       request:
-        timeout: 5s
+        timeout: 10s
       connection:
-        connect-timeout: 5s
-        init-query-timeout: 5s
+        connect-timeout: 10s
+        init-query-timeout: 10s
       schema-action: create_if_not_exists
 
 datastax.astra:
-  secure-connect-bundle: /home/andrew/IdeaProjects/TaskServer/secure-connect-task-db (1).zip
+  secure-connect-bundle: secure-connect-task.zip
 
 astra.db:
-  id: 9c0096c6-204e-4944-9523-f6df947b5914-1
+  id: b046936d-4158-44f3-8677-c7a0d11cd96c-1
   region: europe-west1
   keyspace: main
-  application.token: AstraCS:jsQamnbYNriFDpQfehPqQlOk:c9aa75a822c133e016bc057d43273225c297abe38296439dbe9f468c94b03cf9
+  application.token: AstraCS:ltrTGdcpJCBFTiIXigkEJDOE:f0c2ca07d6adadef5f73b4d092a054a250570cb051e50ee9930d0d0c1da029f7
 
 #logging:
 #  config: /home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml

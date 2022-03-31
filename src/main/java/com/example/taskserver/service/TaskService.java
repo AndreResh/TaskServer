@@ -29,7 +29,7 @@ public class TaskService {
     private final TaskRepository repository;
     private final RestTemplate restTemplate;
     private final TaskClientProperties properties;
-    @Value("my.app.secret")
+    @Value("${my.app.secret}")
     private String jwtSecret;
 
 
@@ -139,14 +139,29 @@ public class TaskService {
     public List<Task> findAllTasks(){
         return repository.findAll();
     }
-    public boolean isTokenValid(HttpServletRequest request){
+    public boolean isTokenValidBoss(HttpServletRequest request){
         try {
             String headerAuth = request.getHeader("Authorization");
-            if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-                String s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject();
-                log.info("JWT: {}",s);
+            if (headerAuth!=null && headerAuth.startsWith("Bearer ")) {
+                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+                return s[2].contains("ROLE_BOSS");
+            } else {
+                return false;
             }
-            return true;
+        } catch (Exception e){
+            return false;
+        }
+    }
+
+    public boolean isTokenValidBossAndUser(HttpServletRequest request) {
+        try {
+            String headerAuth = request.getHeader("Authorization");
+            if (headerAuth!=null && headerAuth.startsWith("Bearer ")) {
+                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+                return s[2].contains("ROLE_BOSS") || s[2].contains("ROLE_USER");
+            } else {
+                return false;
+            }
         } catch (Exception e){
             return false;
         }
