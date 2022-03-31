@@ -1,13 +1,11 @@
 package com.example.taskserver.controller;
 
 
-import com.example.taskserver.domain.Band;
+import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
 import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,6 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
-//    private final static Logger log = LoggerFactory.getLogger(TaskController.class);
     private final TaskService service;
 
     public TaskController(TaskService service) {
@@ -41,9 +38,16 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<Task> getTask(@RequestParam("taskName") String name) {
-        log.info("Searching task with name: {}", name);
-        return ResponseEntity.ok(service.findByName(name));
+    public ResponseEntity<?> getTask(@RequestParam(value = "taskName", required = false) String name) {
+
+        if(name==null){
+            log.info("Getting all tasks");
+            return ResponseEntity.ok(service.findAllTasks());
+        } else {
+            log.info("Searching task with name: {}", name);
+            return ResponseEntity.ok(service.findByName(name));
+        }
+
     }
 
     @GetMapping("/{id}")
@@ -57,6 +61,7 @@ public class TaskController {
             return ResponseEntity.ok(task);
         }
     }
+
 
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable("id") Long id) {

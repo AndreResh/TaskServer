@@ -1,4 +1,4 @@
-package com.example.taskserver.domain;
+package com.example.taskserver.dto;
 
 import lombok.Data;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -7,9 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
     private Long userId;
-    private Long bandId;
     private Long taskId;
-    private String name;
 
     public User() {
     }
