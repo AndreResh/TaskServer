@@ -1,24 +1,24 @@
 spring:
   data:
     cassandra:
-      keyspace-name: schema_db
-      username: eaMLrrEtradaZNjqaCZLqvnc
-      password: i8KNF-MuSe+7_IfTEX1s4nfZge4L,DgG7,zki_H3KQzRqRAS+onD,SvHCm-cglt8vMFQ6.0PxJiFJBna9dCd0Z7oogcpUq,DvpiY,anApK25+uhGcxQJ9NP-N8-MqIY0
+      keyspace-name: main
+      username: jsQamnbYNriFDpQfehPqQlOk
+      password: 3U_5hK-iYXrn3IUxR.h8DLWdSYgTivZAnZxLde8voz0Ba77Ug_LUP9XJy.QjrWIbGptY87_ZSezb,s.vB7Z93zIKM2PDdMA5kZHc1_gxOG58IKZlTuqqucJNi7OD2LBb
       request:
-        timeout: 10s
+        timeout: 5s
       connection:
-        connect-timeout: 10s
-        init-query-timeout: 10s
+        connect-timeout: 5s
+        init-query-timeout: 5s
       schema-action: create_if_not_exists
 
 datastax.astra:
-  secure-connect-bundle: secure-connect-tasks-db (1).zip
+  secure-connect-bundle: /home/andrew/IdeaProjects/TaskServer/secure-connect-task-db (1).zip
 
 astra.db:
-  id: 70815b3c-23df-49d8-83b6-1fce4632359e-1
+  id: 9c0096c6-204e-4944-9523-f6df947b5914-1
   region: europe-west1
-  keyspace: schema_db
-  application.token: AstraCS:eaMLrrEtradaZNjqaCZLqvnc:9f8432bc6ea72fe2d61c542a8f2278523aa1cf7de2504f102957be34a61afe15
+  keyspace: main
+  application.token: AstraCS:jsQamnbYNriFDpQfehPqQlOk:c9aa75a822c133e016bc057d43273225c297abe38296439dbe9f468c94b03cf9
 
 #logging:
 #  config: /home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml
@@ -27,3 +27,7 @@ tasks:
   url-weapons: https://weapon-service-v1.herokuapp.com/api/v1/weapons/
   url-users: https://mafias-user-service-app.herokuapp.com/api/users/
   url-bands: https://heroku-bands.herokuapp.com/bands?bandName=
+
+my:
+  app:
+    secret: AndrewReshetnyakAAAAAAAAAAAAAAAAaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

@@ -7,17 +7,19 @@ import com.example.taskserver.dto.User;
 import com.example.taskserver.dto.Weapon;
 import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.repository.TaskRepository;
+import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,8 @@ public class TaskService {
     private final TaskRepository repository;
     private final RestTemplate restTemplate;
     private final TaskClientProperties properties;
+    @Value("my.app.secret")
+    private String jwtSecret;
 
 
     public TaskService(TaskRepository repository, TaskClientProperties properties, HttpComponentsClientHttpRequestFactory factory) {
@@ -134,5 +138,17 @@ public class TaskService {
     }
     public List<Task> findAllTasks(){
         return repository.findAll();
+    }
+    public boolean isTokenValid(HttpServletRequest request){
+        try {
+            String headerAuth = request.getHeader("Authorization");
+            if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+                String s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject();
+                log.info("JWT: {}",s);
+            }
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 }
