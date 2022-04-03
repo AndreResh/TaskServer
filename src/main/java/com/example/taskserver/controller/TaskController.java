@@ -29,6 +29,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<Task> saveTask(@Valid @RequestBody Task task, Errors errors, HttpServletRequest request) {
         if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         log.info("Task for saving: {}", task);
@@ -47,6 +48,7 @@ public class TaskController {
     @GetMapping
     public ResponseEntity<?> getTask(@RequestParam(value = "taskName", required = false) String name, HttpServletRequest request) {
         if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         if (name == null) {
@@ -62,6 +64,7 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<Task> findTaskById(@PathVariable("id") Long id, HttpServletRequest request) {
         if (!service.isTokenValidBossAndUser(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         log.info("Searching task with id: {}", id);
@@ -78,6 +81,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable("id") Long id ,HttpServletRequest request) {
         if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         log.info("Deleting task with id: {}", id);
@@ -87,6 +91,7 @@ public class TaskController {
     @PatchMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable("id") Long id, @RequestBody Task task, HttpServletRequest request) {
         if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         log.info("Task with id: {}. And body: {}", id, task);
@@ -96,17 +101,22 @@ public class TaskController {
     @PatchMapping("/{id}/addBand")
     public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody Band bandName, HttpServletRequest request) {
         if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         log.info("Add task with name {}", bandName);
-        service.addTaskToBand(id, bandName);
+        service.addTaskToBand(id, bandName, request);
         return ResponseEntity.ok(service.findById(id));
     }
 
     @PatchMapping("/{id}/completed")
-    public ResponseEntity<Task> makeCompleted(@PathVariable("id") Long id) {
+    public ResponseEntity<Task> makeCompleted(@PathVariable("id") Long id, HttpServletRequest request) {
+        if (!service.isTokenValidBoss(request)) {
+            log.error("Not valid JWT Token");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
         log.info("Make task with id: {} completed", id);
-        service.makeTaskCompleted(id);
+        service.makeTaskCompleted(id,request);
         return ResponseEntity.ok(service.findById(id));
     }
 
