@@ -15,7 +15,7 @@ import java.util.List;
 public interface TaskRepository extends CassandraRepository<Task,Long> {
     @Query("select * from task where name=:name allow filtering")
     public Task findByName(@Param("name") String name);
-    @Query("select * from task order by id desc")
+    @Query("select * from task")
     public List<Task> findAllTasks();
     @Query("select * from task where id=:id allow filtering")
     public Task getTaskById(@Param("id")Long id);
