@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 
 
 @Data
-@Table("task")
+@Table(value = "task")
 public class Task {
     @Id
     @PrimaryKeyColumn(
@@ -41,8 +41,6 @@ public class Task {
     @Max(value = 10)
     private Long strength;
     @Column(value = "number_of_people")
-    @NotBlank
-    @NotNull
     @Min(1)
     private Long numberOfPeople;
 }
