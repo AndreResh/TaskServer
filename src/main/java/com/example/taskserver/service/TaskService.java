@@ -111,7 +111,7 @@ public class TaskService {
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
-        HttpHeaders headers=createHeaders(request.getHeader("Authorization"));
+        HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
         Map<String, List<Weapon>> mapOfWeapons =
                 restTemplate.exchange(properties.getUrlWeapons(),
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
@@ -120,8 +120,8 @@ public class TaskService {
                 restTemplate.exchange(properties.getUrlUsers(),
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
                         }).getBody();
-        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o->o.getTask_id()!=null).filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
-        List<User> listUser = mapOfUsers.stream().filter(o->o.getTaskId()!=null).filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null).filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
+        List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null).filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
         if (listUser.isEmpty() || listWeapon.isEmpty()) {
             throw new ApiRequestExceptions("No users or weapons with such task id");
         }
@@ -142,33 +142,34 @@ public class TaskService {
         return repository.findAll();
     }
 
-    public boolean isTokenValidBoss(HttpServletRequest request) {
-        try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-                return s[2].contains("ROLE_BOSS");
+    public void isTokenValidBoss(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+            String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+            if (s[2].contains("ROLE_BOSS")) {
+                return;
             } else {
-                return false;
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
-        } catch (Exception e) {
-            return false;
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
 
-    public boolean isTokenValidBossAndUser(HttpServletRequest request) {
-        try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-                return s[2].contains("ROLE_BOSS") || s[2].contains("ROLE_USER");
+    public void isTokenValidBossAndUser(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+            String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+            if (s[2].contains("ROLE_BOSS") || s[2].contains("ROLE_USER")) {
+                return;
             } else {
-                return false;
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
-        } catch (Exception e) {
-            return false;
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
+
 
     private HttpHeaders createHeaders(String jwt) {
         return new HttpHeaders() {{
