@@ -5,7 +5,6 @@ import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
 import com.example.taskserver.dto.User;
 import com.example.taskserver.dto.Weapon;
-import com.example.taskserver.exeption.ApiRequestExceptions;
 import com.example.taskserver.repository.TaskRepository;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,7 +39,12 @@ public class TaskService {
 
     public Task save(Task task) {
         log.info("Task before saving: {}", task);
-        List<Task> list = findAll();
+        Task task2 = repository.findByName(task.getName());
+        if (task2 != null) {
+            log.error("Task in DB: {}", task);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        List<Task> list = repository.findAllTasks();
         Long number;
         try {
             number = list.stream().max((o1, o2) -> (int) (o1.getId() - o2.getId())).get().getId();
@@ -53,8 +56,13 @@ public class TaskService {
     }
 
     public Task findById(Long id) {
-        log.info("Find Task by id: {}", repository.getTaskById(id));
-        return repository.getTaskById(id);
+        Task task = repository.getTaskById(id);
+        if (Objects.isNull(task)) {
+            log.error("Can't found task with id: {}", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else {
+            return task;
+        }
     }
 
     public void delete(Long id) {
@@ -105,13 +113,14 @@ public class TaskService {
             Long bandId = band.getId();
             repository.addTaskToBand(id, bandId);
         } else {
+            log.error("Task with id: {}. Not found",id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
-        HttpHeaders headers=createHeaders(request.getHeader("Authorization"));
+        HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
         Map<String, List<Weapon>> mapOfWeapons =
                 restTemplate.exchange(properties.getUrlWeapons(),
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
@@ -120,20 +129,22 @@ public class TaskService {
                 restTemplate.exchange(properties.getUrlUsers(),
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
                         }).getBody();
-        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o->o.getTask_id()!=null).filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
-        List<User> listUser = mapOfUsers.stream().filter(o->o.getTaskId()!=null).filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null)
+                .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
+        List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
+                .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
         if (listUser.isEmpty() || listWeapon.isEmpty()) {
-            throw new ApiRequestExceptions("No users or weapons with such task id");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         log.info("List of Users: {}", listUser);
         log.info("List of Weapons: {}", listWeapon);
-        Map<String, Long> mapForWeapons = Map.of("task_id", 0L);
-        Map<String, Object> mapForUsers = Map.of("taskId", 0L);
         listUser.forEach(user -> {
-            restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(), new HttpEntity<>(mapForUsers, headers), Object.class);
+            restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(),
+                    new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
         });
         listWeapon.forEach(weapon -> {
-            restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(), new HttpEntity<>(mapForWeapons, headers), Object.class);
+            restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
+                    new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
         });
         repository.makeTaskCompleted(id);
     }
@@ -142,33 +153,50 @@ public class TaskService {
         return repository.findAll();
     }
 
-    public boolean isTokenValidBoss(HttpServletRequest request) {
-        try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-                return s[2].contains("ROLE_BOSS");
-            } else {
-                return false;
+    public void isTokenValidBoss(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+            String[] s;
+            try {
+                log.error("Unauthorized with this JWT");
+                s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+            } catch (Exception e){
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
-        } catch (Exception e) {
-            return false;
+            if (s[2].contains("ROLE_BOSS")) {
+                return;
+            } else {
+                log.error("Forbidden with this JWT");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
+        } else {
+            log.error("Unauthorized with this JWT");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
 
-    public boolean isTokenValidBossAndUser(HttpServletRequest request) {
-        try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                String[] s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-                return s[2].contains("ROLE_BOSS") || s[2].contains("ROLE_USER");
-            } else {
-                return false;
+    public void isTokenValidBossAndUser(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+            String[] s;
+            try {
+                s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
+            } catch (Exception e){
+                log.error("Unauthorized with this JWT");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
-        } catch (Exception e) {
-            return false;
+            if (s[2].contains("ROLE_BOSS") || s[2].contains("ROLE_USER")) {
+                return;
+            } else {
+                log.error("Forbidden with this JWT");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
+        } else {
+            log.error("Unauthorized with this JWT");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
+
 
     private HttpHeaders createHeaders(String jwt) {
         return new HttpHeaders() {{
