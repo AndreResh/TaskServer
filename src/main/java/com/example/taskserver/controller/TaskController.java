@@ -4,6 +4,7 @@ package com.example.taskserver.controller;
 import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
 import com.example.taskserver.service.TaskService;
+import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class TaskController {
     }
 
     @PostMapping
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<Task> saveTask(@Valid @RequestBody Task task, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Task for saving: {}", task);
@@ -29,6 +31,7 @@ public class TaskController {
     }
 
     @GetMapping
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<?> getTask(@RequestParam(value = "taskName", required = false) String name, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         if (name == null) {
@@ -42,6 +45,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<Task> findTaskById(@PathVariable("id") Long id, HttpServletRequest request) {
         service.isTokenValidBossAndUser(request);
         log.info("Searching task with id: {}", id);
@@ -50,6 +54,7 @@ public class TaskController {
 
 
     @DeleteMapping("/{id}")
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public void deleteTask(@PathVariable("id") Long id, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Deleting task with id: {}", id);
@@ -57,6 +62,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<Task> updateTask(@PathVariable("id") Long id, @RequestBody Task task, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Task with id: {}. And body: {}", id, task);
@@ -64,6 +70,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/addBand")
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody Band bandName, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Add task with name {}", bandName);
@@ -72,6 +79,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/completed")
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
     public ResponseEntity<Task> makeCompleted(@PathVariable("id") Long id, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Make task with id: {} completed", id);

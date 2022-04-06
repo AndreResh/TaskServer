@@ -10,6 +10,9 @@ spring:
         connect-timeout: 10s
         init-query-timeout: 10s
       schema-action: create_if_not_exists
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 datastax.astra:
   secure-connect-bundle: secure-connect-task.zip
