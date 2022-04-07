@@ -3,6 +3,7 @@ package com.example.taskserver.controller;
 
 import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
+import com.example.taskserver.dto.TaskForUpdateDTO;
 import com.example.taskserver.service.TaskService;
 import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,7 @@ public class TaskController {
 
     @PatchMapping("/{id}")
     @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
-    public ResponseEntity<Task> updateTask(@PathVariable("id") Long id, @RequestBody Task task, HttpServletRequest request) {
+    public ResponseEntity<Task> updateTask(@PathVariable("id") Long id,@Valid @RequestBody TaskForUpdateDTO task, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Task with id: {}. And body: {}", id, task);
         return ResponseEntity.ok(service.update(id, task));

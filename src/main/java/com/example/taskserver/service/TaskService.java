@@ -3,6 +3,7 @@ package com.example.taskserver.service;
 import com.example.taskserver.Configuration.TaskClientProperties;
 import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
+import com.example.taskserver.dto.TaskForUpdateDTO;
 import com.example.taskserver.dto.User;
 import com.example.taskserver.dto.Weapon;
 import com.example.taskserver.repository.TaskRepository;
@@ -80,24 +81,21 @@ public class TaskService {
         return repository.findByName(name);
     }
 
-    public Task update(Long id, Task t) {
-        log.info("Task with id: {}. And body: {}", id, t);
+    public Task update(Long id, TaskForUpdateDTO taskForUpdateDTO) {
+        log.info("Task with id: {}. And body: {}", id, taskForUpdateDTO);
         Task task1 = findById(id);
         task1.setId(id);
-        if (t.getName() != null) {
-            task1.setName(t.getName());
+        if (taskForUpdateDTO.getName() != null) {
+            task1.setName(taskForUpdateDTO.getName());
         }
-        if (t.getDescription() != null) {
-            task1.setDescription(t.getDescription());
+        if (taskForUpdateDTO.getDescription() != null) {
+            task1.setDescription(taskForUpdateDTO.getDescription());
         }
-        if (t.getStrength() != null) {
-            task1.setStrength(t.getStrength());
+        if (taskForUpdateDTO.getStrength() != null) {
+            task1.setStrength(taskForUpdateDTO.getStrength());
         }
-        if (t.getNumberOfPeople() != null) {
-            task1.setNumberOfPeople(t.getNumberOfPeople());
-        }
-        if (t.getBandId() != null) {
-            task1.setBandId(t.getBandId());
+        if (taskForUpdateDTO.getNumberOfPeople() != null) {
+            task1.setNumberOfPeople(taskForUpdateDTO.getNumberOfPeople());
         }
         log.info("Task which updating: {}", task1);
         repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength(), task1.getNumberOfPeople());
@@ -120,7 +118,16 @@ public class TaskService {
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
-        HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
+        Optional<Task> task = repository.findById(id);
+        if(!task.isPresent()){
+            log.error("Task id: {}. Not found", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        if(task.get().isCompleted()){
+            log.error("Task is completed: {}",task.get());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+         HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
         Map<String, List<Weapon>> mapOfWeapons =
                 restTemplate.exchange(properties.getUrlWeapons(),
                         HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
