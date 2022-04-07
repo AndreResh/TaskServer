@@ -3,6 +3,7 @@ package com.example.taskserver.controller;
 
 import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
+import com.example.taskserver.dto.TaskDTO;
 import com.example.taskserver.dto.TaskForUpdateDTO;
 import com.example.taskserver.service.TaskService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -25,7 +26,7 @@ public class TaskController {
 
     @PostMapping
     @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
-    public ResponseEntity<Task> saveTask(@Valid @RequestBody Task task, HttpServletRequest request) {
+    public ResponseEntity<Task> saveTask(@Valid @RequestBody TaskDTO task, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Task for saving: {}", task);
         return ResponseEntity.ok(service.save(task));

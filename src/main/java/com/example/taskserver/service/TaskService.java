@@ -1,11 +1,8 @@
 package com.example.taskserver.service;
 
 import com.example.taskserver.Configuration.TaskClientProperties;
-import com.example.taskserver.dto.Band;
+import com.example.taskserver.dto.*;
 import com.example.taskserver.domain.Task;
-import com.example.taskserver.dto.TaskForUpdateDTO;
-import com.example.taskserver.dto.User;
-import com.example.taskserver.dto.Weapon;
 import com.example.taskserver.repository.TaskRepository;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +35,11 @@ public class TaskService {
         this.properties = properties;
     }
 
-    public Task save(Task task) {
-        log.info("Task before saving: {}", task);
-        Task task2 = repository.findByName(task.getName());
+    public Task save(TaskDTO taskDTO) {
+        log.info("Task before saving: {}", taskDTO);
+        Task task2 = repository.findByName(taskDTO.getName());
         if (task2 != null) {
-            log.error("Task in DB: {}", task);
+            log.error("Task in DB: {}", taskDTO);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         List<Task> list = repository.findAllTasks();
@@ -52,7 +49,12 @@ public class TaskService {
         } catch (NoSuchElementException e) {
             number = 0L;
         }
+        Task task =new Task();
         task.setId(++number);
+        task.setName(taskDTO.getName());
+        task.setDescription(taskDTO.getDescription());
+        task.setStrength(taskDTO.getStrength());
+        task.setNumberOfPeople(task.getNumberOfPeople());
         return repository.save(task);
     }
 
