@@ -11,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -49,7 +50,7 @@ public class TaskService {
         } catch (NoSuchElementException e) {
             number = 0L;
         }
-        Task task =new Task();
+        Task task = new Task();
         task.setId(++number);
         task.setName(taskDTO.getName());
         task.setDescription(taskDTO.getDescription());
@@ -104,58 +105,63 @@ public class TaskService {
         return task1;
     }
 
-    public void addTaskToBand(Long id,String bandName, HttpServletRequest request) {
+    public void addTaskToBand(Long id, String bandName, HttpServletRequest request) {
         log.info("add to Task with id: {}. Band name: {}", id, bandName);
-        Band band = restTemplate.exchange(properties.getUrlBands() + bandName,
-                HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
-                }).getBody();
-        if (band != null) {
-            Long bandId = band.getId();
-            repository.addTaskToBand(id, bandId);
-        } else {
-            log.error("Task with id: {}. Not found",id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        ResponseEntity<Band> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(properties.getUrlBands() + bandName,
+                    HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            log.error("Client error with status code: {}", e.getStatusCode());
+            throw new ResponseStatusException(e.getStatusCode());
         }
-
+        Band band = responseEntity.getBody();
+        Long bandId = band.getId();
+        repository.addTaskToBand(id, bandId);
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
-        Optional<Task> task = repository.findById(id);
-        if(!task.isPresent()){
-            log.error("Task id: {}. Not found", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        try {
+            Optional<Task> task = repository.findById(id);
+            if (!task.isPresent()) {
+                log.error("Task id: {}. Not found", id);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+            if (task.get().isCompleted()) {
+                log.error("Task is completed: {}", task.get());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+            HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
+            Map<String, List<Weapon>> mapOfWeapons =
+                    restTemplate.exchange(properties.getUrlWeapons(),
+                            HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
+                            }).getBody();
+            List<User> mapOfUsers =
+                    restTemplate.exchange(properties.getUrlUsers(),
+                            HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
+                            }).getBody();
+            List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null)
+                    .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
+            List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
+                    .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+            if (listUser.isEmpty() || listWeapon.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+            log.info("List of Users: {}", listUser);
+            log.info("List of Weapons: {}", listWeapon);
+            listUser.forEach(user -> {
+                restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(),
+                        new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
+            });
+            listWeapon.forEach(weapon -> {
+                restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
+                        new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
+            });
+            repository.makeTaskCompleted(id);
+        } catch (HttpClientErrorException e){
+            throw new ResponseStatusException(e.getStatusCode());
         }
-        if(task.get().isCompleted()){
-            log.error("Task is completed: {}",task.get());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-         HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
-        Map<String, List<Weapon>> mapOfWeapons =
-                restTemplate.exchange(properties.getUrlWeapons(),
-                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
-                        }).getBody();
-        List<User> mapOfUsers =
-                restTemplate.exchange(properties.getUrlUsers(),
-                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
-                        }).getBody();
-        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null)
-                .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
-        List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
-                .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
-        if (listUser.isEmpty() || listWeapon.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        log.info("List of Users: {}", listUser);
-        log.info("List of Weapons: {}", listWeapon);
-        listUser.forEach(user -> {
-            restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(),
-                    new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
-        });
-        listWeapon.forEach(weapon -> {
-            restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
-                    new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
-        });
-        repository.makeTaskCompleted(id);
     }
 
     public List<Task> findAllTasks() {
@@ -169,7 +175,7 @@ public class TaskService {
             try {
                 log.error("Unauthorized with this JWT");
                 s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-            } catch (Exception e){
+            } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
             if (s[2].contains("ROLE_BOSS")) {
@@ -190,7 +196,7 @@ public class TaskService {
             String[] s;
             try {
                 s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("Unauthorized with this JWT");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
