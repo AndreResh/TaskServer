@@ -9,6 +9,7 @@ import com.example.taskserver.dto.TaskForUpdateDTO;
 import com.example.taskserver.service.TaskService;
 import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,10 +61,11 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
-    public void deleteTask(@PathVariable("id") Long id, HttpServletRequest request) {
+    public ResponseEntity<?> deleteTask(@PathVariable("id") Long id, HttpServletRequest request) {
         service.isTokenValidBoss(request);
         log.info("Deleting task with id: {}", id);
         service.delete(id);
+        return  ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")

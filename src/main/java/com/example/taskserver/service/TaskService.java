@@ -71,6 +71,10 @@ public class TaskService {
 
     public void delete(Long id) {
         log.info("Task for deleting: {}", repository.getTaskById(id));
+        Optional<Task> optionalTask = repository.findById(id);
+        if(!optionalTask.isPresent()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         repository.deleteById(id);
     }
 
