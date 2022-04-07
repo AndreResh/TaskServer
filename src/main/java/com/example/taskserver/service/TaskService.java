@@ -73,6 +73,7 @@ public class TaskService {
         log.info("Task for deleting: {}", repository.getTaskById(id));
         Optional<Task> optionalTask = repository.findById(id);
         if(!optionalTask.isPresent()){
+            log.error("task with id: {} not found", id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         repository.deleteById(id);
@@ -84,8 +85,13 @@ public class TaskService {
     }
 
     public Task findByName(String name) {
-        log.info("Find Task by name: {}", repository.findByName(name));
-        return repository.findByName(name);
+        Task task=repository.findByName(name);
+        if(task==null){
+            log.error("Task by name: {} not found", name);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        log.info("Find Task: {}. By name: {}", task, name);
+        return task;
     }
 
     public Task update(Long id, TaskForUpdateDTO taskForUpdateDTO) {
