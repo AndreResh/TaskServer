@@ -104,9 +104,9 @@ public class TaskService {
         return task1;
     }
 
-    public void addTaskToBand(Long id, Band band, HttpServletRequest request) {
-        log.info("add to Task with id: {}. Band name: {}", id, band.getBandName());
-        band = restTemplate.exchange(properties.getUrlBands() + band.getBandName(),
+    public void addTaskToBand(Long id,String bandName, HttpServletRequest request) {
+        log.info("add to Task with id: {}. Band name: {}", id, bandName);
+        Band band = restTemplate.exchange(properties.getUrlBands() + bandName,
                 HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
                 }).getBody();
         if (band != null) {

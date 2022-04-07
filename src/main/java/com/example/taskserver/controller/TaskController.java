@@ -3,6 +3,7 @@ package com.example.taskserver.controller;
 
 import com.example.taskserver.dto.Band;
 import com.example.taskserver.domain.Task;
+import com.example.taskserver.dto.BandDTO;
 import com.example.taskserver.dto.TaskDTO;
 import com.example.taskserver.dto.TaskForUpdateDTO;
 import com.example.taskserver.service.TaskService;
@@ -13,12 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
     private final TaskService service;
+    private final Map<String,String> map =Map.of("bandName", "");
 
     public TaskController(TaskService service) {
         this.service = service;
@@ -73,10 +76,10 @@ public class TaskController {
 
     @PatchMapping("/{id}/addBand")
     @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
-    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody Band bandName, HttpServletRequest request) {
+    public ResponseEntity<Task> addToBand(@PathVariable("id") Long id, @RequestBody BandDTO bandDTO, HttpServletRequest request) {
         service.isTokenValidBoss(request);
-        log.info("Add task with name {}", bandName);
-        service.addTaskToBand(id, bandName, request);
+        log.info("Add task with name {}", bandDTO);
+        service.addTaskToBand(id, bandDTO.getBandName(), request);
         return ResponseEntity.ok(service.findById(id));
     }
 
