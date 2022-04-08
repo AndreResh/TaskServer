@@ -100,7 +100,7 @@ public class TaskService {
         task1.setId(id);
         if (taskForUpdateDTO.getName() != null) {
             Task task = repository.findByName(taskForUpdateDTO.getName());
-            if(task!=null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            if(task!=null && !task1.getName().equals(taskForUpdateDTO.getName())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             task1.setName(taskForUpdateDTO.getName());
         }
         if (taskForUpdateDTO.getDescription() != null) {
