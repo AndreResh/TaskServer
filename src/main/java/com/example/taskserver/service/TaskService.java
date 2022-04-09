@@ -1,6 +1,6 @@
 package com.example.taskserver.service;
 
-import com.example.taskserver.Configuration.TaskClientProperties;
+import com.example.taskserver.configuration.TaskClientProperties;
 import com.example.taskserver.dto.*;
 import com.example.taskserver.domain.Task;
 import com.example.taskserver.repository.TaskRepository;
@@ -55,7 +55,6 @@ public class TaskService {
         task.setName(taskDTO.getName());
         task.setDescription(taskDTO.getDescription());
         task.setStrength(taskDTO.getStrength());
-        task.setNumberOfPeople(task.getNumberOfPeople());
         return repository.save(task);
     }
 
@@ -79,16 +78,12 @@ public class TaskService {
         repository.deleteById(id);
     }
 
-    public List<Task> findAll() {
-        log.info("All tasks: {}", repository.findAllTasks());
-        return repository.findAllTasks();
-    }
 
-    public Task findByName(String name) {
+    public Object findByName(String name) {
         Task task=repository.findByName(name);
         if(task==null){
-            log.error("Task by name: {} not found", name);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            log.info("Task by name: {} not found", name);
+            return Collections.emptyList();
         }
         log.info("Find Task: {}. By name: {}", task, name);
         return task;
@@ -109,11 +104,8 @@ public class TaskService {
         if (taskForUpdateDTO.getStrength() != null) {
             task1.setStrength(taskForUpdateDTO.getStrength());
         }
-        if (taskForUpdateDTO.getNumberOfPeople() != null) {
-            task1.setNumberOfPeople(taskForUpdateDTO.getNumberOfPeople());
-        }
         log.info("Task which updating: {}", task1);
-        repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength(), task1.getNumberOfPeople());
+        repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength());
         return task1;
     }
 

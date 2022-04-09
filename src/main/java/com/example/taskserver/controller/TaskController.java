@@ -22,7 +22,6 @@ import java.util.Map;
 @RequestMapping("/tasks")
 public class TaskController {
     private final TaskService service;
-    private final Map<String,String> map =Map.of("bandName", "");
 
     public TaskController(TaskService service) {
         this.service = service;

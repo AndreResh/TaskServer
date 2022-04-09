@@ -40,7 +40,4 @@ public class Task {
     @Min(value = 1)
     @Max(value = 10)
     private Long strength;
-    @Column(value = "number_of_people")
-    @Min(1)
-    private Long numberOfPeople;
 }

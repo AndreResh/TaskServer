@@ -15,6 +15,4 @@ public class TaskDTO {
     @Min(value = 1)
     @Max(value = 10)
     private Long strength;
-    @Min(1)
-    private Long numberOfPeople;
 }

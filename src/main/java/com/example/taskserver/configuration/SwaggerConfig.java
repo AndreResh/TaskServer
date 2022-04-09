@@ -1,4 +1,4 @@
-package com.example.taskserver.Configuration;
+package com.example.taskserver.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
