@@ -71,7 +71,7 @@ public class TaskService {
     public void delete(Long id) {
         log.info("Task for deleting: {}", repository.getTaskById(id));
         Optional<Task> optionalTask = repository.findById(id);
-        if(!optionalTask.isPresent()){
+        if (!optionalTask.isPresent()) {
             log.error("task with id: {} not found", id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -80,8 +80,8 @@ public class TaskService {
 
 
     public Object findByName(String name) {
-        Task task=repository.findByName(name);
-        if(task==null){
+        Task task = repository.findByName(name);
+        if (task == null) {
             log.info("Task by name: {} not found", name);
             return Collections.emptyList();
         }
@@ -95,7 +95,8 @@ public class TaskService {
         task1.setId(id);
         if (taskForUpdateDTO.getName() != null) {
             Task task = repository.findByName(taskForUpdateDTO.getName());
-            if(task!=null && !task1.getName().equals(taskForUpdateDTO.getName())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            if (task != null && !task1.getName().equals(taskForUpdateDTO.getName()))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             task1.setName(taskForUpdateDTO.getName());
         }
         if (taskForUpdateDTO.getDescription() != null) {
@@ -126,17 +127,25 @@ public class TaskService {
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
+        Optional<Task> task = repository.findById(id);
+        if (!task.isPresent()) {
+            log.error("Task id: {}. Not found", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         try {
-            Optional<Task> task = repository.findById(id);
-            if (!task.isPresent()) {
-                log.error("Task id: {}. Not found", id);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-            }
             if (task.get().isCompleted()) {
                 log.error("Task is completed: {}", task.get());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
             HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
+            log.info("PROPERTIES: {}, ", properties.getUrlBandsForLogic());
+            Boolean object = restTemplate.exchange(properties.getUrlBandsForLogic(), HttpMethod.GET,
+                    new HttpEntity<>(headers), Boolean.class, task.get().getId()).getBody();
+            log.info("RESPONSE: {}", object);
+            if (!object) {
+                log.error("Task is not completed");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
             Map<String, List<Weapon>> mapOfWeapons =
                     restTemplate.exchange(properties.getUrlWeapons(),
                             HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
@@ -149,7 +158,7 @@ public class TaskService {
                     .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
             List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
                     .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
-            if (listUser.isEmpty() || listWeapon.isEmpty()) {
+            if (listUser.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             log.info("List of Users: {}", listUser);
@@ -163,8 +172,12 @@ public class TaskService {
                         new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
             });
             repository.makeTaskCompleted(id);
-        } catch (HttpClientErrorException e){
+        } catch (HttpClientErrorException e) {
+            log.error("Client Error: {}", e.getMessage());
             throw new ResponseStatusException(e.getStatusCode());
+        } catch (Exception e) {
+            log.error("Another error: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 

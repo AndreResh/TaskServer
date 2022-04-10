@@ -30,6 +30,7 @@ tasks:
   url-weapons: https://weapon-service-v1.herokuapp.com/api/v1/weapons/
   url-users: https://mafias-user-service-app.herokuapp.com/api/users/
   url-bands: https://heroku-bands.herokuapp.com/bands?bandName=
+  url-bands-for-logic: https://heroku-bands.herokuapp.com/bands/tasks/{id}/check
 
 my:
   app:
