@@ -117,8 +117,8 @@ public class TaskService {
             responseEntity = restTemplate.exchange(properties.getUrlBands() + bandName,
                     HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
                     });
-        } catch (HttpClientErrorException e) {
-            log.error("Client error with status code: {}", e.getStatusCode());
+        } catch (Exception e) {
+            log.error("RTask not found");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         Band band = responseEntity.getBody();
