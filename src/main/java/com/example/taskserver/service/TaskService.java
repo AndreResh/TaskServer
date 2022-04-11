@@ -133,10 +133,10 @@ public class TaskService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         try {
-//            if (task.get().isCompleted()) {
-//                log.error("Task is completed: {}", task.get());
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-//            }
+            if (task.get().isCompleted()) {
+                log.error("Task is completed: {}", task.get());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
             HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
             log.info("PROPERTIES: {}, ", properties.getUrlBandsForLogic());
             Boolean object = restTemplate.exchange(properties.getUrlBandsForLogic(), HttpMethod.GET,
