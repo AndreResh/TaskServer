@@ -169,7 +169,7 @@ public class TaskService {
             });
             listWeapon.forEach(weapon -> {
                 restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
-                        new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
+                        new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
             });
             repository.makeTaskCompleted(id);
         } catch (HttpClientErrorException e) {
