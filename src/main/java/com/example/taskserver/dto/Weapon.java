@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Weapon {
     private Long id;
-    private Long task_id;
+    private Long taskId;
 
     public Weapon() {
     }

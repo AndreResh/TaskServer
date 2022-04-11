@@ -119,7 +119,7 @@ public class TaskService {
                     });
         } catch (HttpClientErrorException e) {
             log.error("Client error with status code: {}", e.getStatusCode());
-            throw new ResponseStatusException(e.getStatusCode());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         Band band = responseEntity.getBody();
         Long bandId = band.getId();
@@ -154,8 +154,8 @@ public class TaskService {
                     restTemplate.exchange(properties.getUrlUsers(),
                             HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
                             }).getBody();
-            List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null)
-                    .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
+            List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTaskId() != null)
+                    .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
             List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
                     .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
             if (listUser.isEmpty()) {
