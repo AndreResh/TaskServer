@@ -5,5 +5,3 @@ services:
     build:
       context: .
     container_name: tasks-service
-    ports:
-      - "8080:8080"
