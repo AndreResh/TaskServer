@@ -1,10 +1,8 @@
 package com.example.taskserver.service;
 
-import com.example.taskserver.Configuration.TaskClientProperties;
-import com.example.taskserver.dto.Band;
+import com.example.taskserver.configuration.TaskClientProperties;
+import com.example.taskserver.dto.*;
 import com.example.taskserver.domain.Task;
-import com.example.taskserver.dto.User;
-import com.example.taskserver.dto.Weapon;
 import com.example.taskserver.repository.TaskRepository;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -37,11 +36,11 @@ public class TaskService {
         this.properties = properties;
     }
 
-    public Task save(Task task) {
-        log.info("Task before saving: {}", task);
-        Task task2 = repository.findByName(task.getName());
+    public Task save(TaskDTO taskDTO) {
+        log.info("Task before saving: {}", taskDTO);
+        Task task2 = repository.findByName(taskDTO.getName());
         if (task2 != null) {
-            log.error("Task in DB: {}", task);
+            log.error("Task in DB: {}", taskDTO);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         List<Task> list = repository.findAllTasks();
@@ -51,7 +50,11 @@ public class TaskService {
         } catch (NoSuchElementException e) {
             number = 0L;
         }
+        Task task = new Task();
         task.setId(++number);
+        task.setName(taskDTO.getName());
+        task.setDescription(taskDTO.getDescription());
+        task.setStrength(taskDTO.getStrength());
         return repository.save(task);
     }
 
@@ -67,86 +70,115 @@ public class TaskService {
 
     public void delete(Long id) {
         log.info("Task for deleting: {}", repository.getTaskById(id));
+        Optional<Task> optionalTask = repository.findById(id);
+        if (!optionalTask.isPresent()) {
+            log.error("task with id: {} not found", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         repository.deleteById(id);
     }
 
-    public List<Task> findAll() {
-        log.info("All tasks: {}", repository.findAllTasks());
-        return repository.findAllTasks();
+
+    public Object findByName(String name) {
+        Task task = repository.findByName(name);
+        if (task == null) {
+            log.info("Task by name: {} not found", name);
+            return Collections.emptyList();
+        }
+        log.info("Find Task: {}. By name: {}", task, name);
+        return task;
     }
 
-    public Task findByName(String name) {
-        log.info("Find Task by name: {}", repository.findByName(name));
-        return repository.findByName(name);
-    }
-
-    public Task update(Long id, Task t) {
-        log.info("Task with id: {}. And body: {}", id, t);
+    public Task update(Long id, TaskForUpdateDTO taskForUpdateDTO) {
+        log.info("Task with id: {}. And body: {}", id, taskForUpdateDTO);
         Task task1 = findById(id);
         task1.setId(id);
-        if (t.getName() != null) {
-            task1.setName(t.getName());
+        if (taskForUpdateDTO.getName() != null) {
+            Task task = repository.findByName(taskForUpdateDTO.getName());
+            if (task != null && !task1.getName().equals(taskForUpdateDTO.getName()))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            task1.setName(taskForUpdateDTO.getName());
         }
-        if (t.getDescription() != null) {
-            task1.setDescription(t.getDescription());
+        if (taskForUpdateDTO.getDescription() != null) {
+            task1.setDescription(taskForUpdateDTO.getDescription());
         }
-        if (t.getStrength() != null) {
-            task1.setStrength(t.getStrength());
-        }
-        if (t.getNumberOfPeople() != null) {
-            task1.setNumberOfPeople(t.getNumberOfPeople());
-        }
-        if (t.getBandId() != null) {
-            task1.setBandId(t.getBandId());
+        if (taskForUpdateDTO.getStrength() != null) {
+            task1.setStrength(taskForUpdateDTO.getStrength());
         }
         log.info("Task which updating: {}", task1);
-        repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength(), task1.getNumberOfPeople());
+        repository.update(id, task1.getName(), task1.getDescription(), task1.getStrength());
         return task1;
     }
 
-    public void addTaskToBand(Long id, Band band, HttpServletRequest request) {
-        log.info("add to Task with id: {}. Band name: {}", id, band.getBandName());
-        band = restTemplate.exchange(properties.getUrlBands() + band.getBandName(),
-                HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
-                }).getBody();
-        if (band != null) {
-            Long bandId = band.getId();
-            repository.addTaskToBand(id, bandId);
-        } else {
-            log.error("Task with id: {}. Not found",id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public void addTaskToBand(Long id, String bandName, HttpServletRequest request) {
+        log.info("add to Task with id: {}. Band name: {}", id, bandName);
+        ResponseEntity<Band> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(properties.getUrlBands() + bandName,
+                    HttpMethod.GET, new HttpEntity<>(createHeaders(request.getHeader("Authorization"))), new ParameterizedTypeReference<Band>() {
+                    });
+        } catch (Exception e) {
+            log.error("RTask not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-
+        Band band = responseEntity.getBody();
+        Long bandId = band.getId();
+        repository.addTaskToBand(id, bandId);
     }
 
     public void makeTaskCompleted(Long id, HttpServletRequest request) {
-        HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
-        Map<String, List<Weapon>> mapOfWeapons =
-                restTemplate.exchange(properties.getUrlWeapons(),
-                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
-                        }).getBody();
-        List<User> mapOfUsers =
-                restTemplate.exchange(properties.getUrlUsers(),
-                        HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
-                        }).getBody();
-        List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTask_id() != null)
-                .filter(o -> o.getTask_id().equals(id)).collect(Collectors.toList());
-        List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
-                .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
-        if (listUser.isEmpty() || listWeapon.isEmpty()) {
+        Optional<Task> task = repository.findById(id);
+        if (!task.isPresent()) {
+            log.error("Task id: {}. Not found", id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        log.info("List of Users: {}", listUser);
-        log.info("List of Weapons: {}", listWeapon);
-        listUser.forEach(user -> {
-            restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(),
-                    new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
-        });
-        listWeapon.forEach(weapon -> {
-            restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
-                    new HttpEntity<>(Map.of("task_id", 0L), headers), Object.class);
-        });
-        repository.makeTaskCompleted(id);
+        try {
+            if (task.get().isCompleted()) {
+                log.error("Task is completed: {}", task.get());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+            HttpHeaders headers = createHeaders(request.getHeader("Authorization"));
+            log.info("PROPERTIES: {}, ", properties.getUrlBandsForLogic());
+            Boolean object = restTemplate.exchange(properties.getUrlBandsForLogic(), HttpMethod.GET,
+                    new HttpEntity<>(headers), Boolean.class, task.get().getId()).getBody();
+            log.info("RESPONSE: {}", object);
+            if (!object) {
+                log.error("Task is not completed");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+            Map<String, List<Weapon>> mapOfWeapons =
+                    restTemplate.exchange(properties.getUrlWeapons(),
+                            HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, List<Weapon>>>() {
+                            }).getBody();
+            List<User> mapOfUsers =
+                    restTemplate.exchange(properties.getUrlUsers(),
+                            HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<User>>() {
+                            }).getBody();
+            List<Weapon> listWeapon = mapOfWeapons.get("weapons").stream().filter(o -> o.getTaskId() != null)
+                    .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+            List<User> listUser = mapOfUsers.stream().filter(o -> o.getTaskId() != null)
+                    .filter(o -> o.getTaskId().equals(id)).collect(Collectors.toList());
+            if (listUser.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+            log.info("List of Users: {}", listUser);
+            log.info("List of Weapons: {}", listWeapon);
+            listUser.forEach(user -> {
+                restTemplate.patchForObject(properties.getUrlUsers() + user.getUserId(),
+                        new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
+            });
+            listWeapon.forEach(weapon -> {
+                restTemplate.patchForObject(properties.getUrlWeapons() + weapon.getId(),
+                        new HttpEntity<>(Map.of("taskId", 0L), headers), Object.class);
+            });
+            repository.makeTaskCompleted(id);
+        } catch (HttpClientErrorException e) {
+            log.error("Client Error: {}", e.getMessage());
+            throw new ResponseStatusException(e.getStatusCode());
+        } catch (Exception e) {
+            log.error("Another error: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 
     public List<Task> findAllTasks() {
@@ -160,7 +192,7 @@ public class TaskService {
             try {
                 log.error("Unauthorized with this JWT");
                 s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-            } catch (Exception e){
+            } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
             if (s[2].contains("ROLE_BOSS")) {
@@ -181,7 +213,7 @@ public class TaskService {
             String[] s;
             try {
                 s = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(headerAuth.substring(7)).getBody().getSubject().split(" ");
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("Unauthorized with this JWT");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }

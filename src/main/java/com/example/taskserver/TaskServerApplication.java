@@ -1,7 +1,7 @@
 package com.example.taskserver;
 
-import com.example.taskserver.Configuration.DataStaxAstraProperties;
-import com.example.taskserver.Configuration.TaskClientProperties;
+import com.example.taskserver.configuration.DataStaxAstraProperties;
+import com.example.taskserver.configuration.TaskClientProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

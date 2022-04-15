@@ -1,6 +1,5 @@
-package com.example.taskserver.Configuration;
+package com.example.taskserver.configuration;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "tasks")
@@ -8,6 +7,15 @@ public class TaskClientProperties {
     private String urlWeapons;
     private String urlUsers;
     private String urlBands;
+    private String urlBandsForLogic;
+
+    public String getUrlBandsForLogic() {
+        return urlBandsForLogic;
+    }
+
+    public void setUrlBandsForLogic(String urlBandsForLogic) {
+        this.urlBandsForLogic = urlBandsForLogic;
+    }
 
     public String getUrlWeapons() {
         return urlWeapons;

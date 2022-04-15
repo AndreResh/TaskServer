@@ -1,4 +1,4 @@
-package com.example.taskserver.Configuration;
+package com.example.taskserver.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
