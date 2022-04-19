@@ -1,3 +1,5 @@
+server:
+  port: ${PORT:8080}
 spring:
   data:
     cassandra:
@@ -27,10 +29,10 @@ astra.db:
 #  config: /home/andrew/IdeaProjects/Task Server/src/main/resources/logback.xml
 
 tasks:
-  url-weapons: https://weapon-service-v1.herokuapp.com/api/v1/weapons/
-  url-users: https://mafias-user-service-app.herokuapp.com/api/users/
-  url-bands: https://heroku-bands.herokuapp.com/bands?bandName=
-  url-bands-for-logic: https://heroku-bands.herokuapp.com/bands/tasks/{id}/check
+  url-weapons: https://weapon-service-app.herokuapp.com/api/v1/weapons/
+  url-users: https://mafia-user-server-demo.herokuapp.com/api/users/
+  url-bands: https://band-service.herokuapp.com/bands?bandName=
+  url-bands-for-logic: https://band-service.herokuapp.com/bands/tasks/{id}/check
 
 my:
   app:
